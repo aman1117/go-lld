@@ -67,4 +67,5 @@ func MeetingScheduler() {
 	fmt.Println(scheduler.Book(15, 3, 6)) // HolyCow
 	fmt.Println(scheduler.Book(15, 7, 8)) // HolyCow
 	fmt.Println(scheduler.Book(16, 6, 9)) // Atlas
+	fmt.Println()
 }

@@ -1,99 +1,160 @@
-// package classes
+package classes
 
-// import (
-// 	"fmt"
-// 	"sync"
-// )
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+)
 
-// var (
-// 	playerId int = 1
-// 	mu       sync.Mutex
-// )
+type Snake struct {
+	start, end int
+}
 
-// type Snake struct {
-// 	start, end int
-// }
+func NewSnake(start, end int) *Snake {
+	return &Snake{start: start, end: end}
+}
 
-// func NewSnake(start, end int) *Snake {
-// 	return &Snake{start: start, end: end}
-// }
+type Ladder struct {
+	start, end int
+}
 
-// func (snake *Snake) GetStart() int {
-// 	return snake.start
-// }
+func NewLadder(start, end int) *Ladder {
+	return &Ladder{start: start, end: end}
+}
 
-// func (snake *Snake) GetEnd() int {
-// 	return snake.end
-// }
+type Player struct {
+	id              int
+	name            string
+	currentPosition int
+}
 
-// type Ladder struct {
-// 	start, end int
-// }
+var playerIDCounter int
+var playerIDMutex sync.Mutex
 
-// func NewLadder(start, end int) *Ladder {
-// 	return &Ladder{start: start, end: end}
-// }
+func NewPlayer(name string) *Player {
+	playerIDMutex.Lock()
+	defer playerIDMutex.Unlock()
+	playerIDCounter++
+	return &Player{id: playerIDCounter, name: name, currentPosition: 0}
+}
 
-// func (ladder *Ladder) GetStart() int {
-// 	return ladder.start
-// }
+func (p *Player) GetCurrentPosition() int {
+	return p.currentPosition
+}
 
-// func (ladder *Ladder) GetEnd() int {
-// 	return ladder.end
-// }
+func (p *Player) SetCurrentPosition(position int) {
+	p.currentPosition = position
+}
 
-// /*
-// class Player {
-//  public:
-//   Player(string);
-//   int getCurrentPosition() const;
-//   void setCurrentPosition(int currentPosition);
-//   int getId() const;
-//   const string& getName() const;
+func (p *Player) GetName() string {
+	return p.name
+}
 
-//  private:
-//   int id;
-//   string name;
-//   int currentPosition;
-//   int getUniqueId();
-// };
-// */
+func (p *Player) GetId() int {
+	return p.id
+}
 
-// type Player struct {
-// 	id, currentPosition int
-// 	name                string
-// }
+type Game struct {
+	players          []*Player
+	currentTurn      int
+	winner           *Player
+	snakesAndLadders map[int]int
+	mu               sync.Mutex
+}
 
-// func NewPlayer(name string) *Player {
-// 	return &Player{name: name}
-// }
+func NewGame(snakes []*Snake, ladders []*Ladder, players []*Player) *Game {
+	snakesAndLadders := make(map[int]int)
+	for _, snake := range snakes {
+		snakesAndLadders[snake.start] = snake.end
+	}
+	for _, ladder := range ladders {
+		snakesAndLadders[ladder.start] = ladder.end
+	}
+	return &Game{players: players, snakesAndLadders: snakesAndLadders}
+}
 
-// func (player *Player) GetCurrentPosition() int {
-// 	return player.currentPosition
-// }
+func (g *Game) Roll(player *Player, diceValue int) bool {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 
-// func (player *Player) SetCurrentPosition(currentPosition int) {
-// 	player.currentPosition = currentPosition
-// }
+	if g.winner != nil || diceValue > 6 || diceValue < 1 || g.players[g.currentTurn].GetId() != player.GetId() {
+		return false
+	}
 
-// func (player *Player) GetId() int {
-// 	return player.id
-// }
+	destination := g.players[g.currentTurn].GetCurrentPosition() + diceValue
+	if destination <= 100 {
+		if end, exists := g.snakesAndLadders[destination]; exists {
+			g.players[g.currentTurn].SetCurrentPosition(end)
+		} else {
+			g.players[g.currentTurn].SetCurrentPosition(destination)
+		}
+	}
 
-// func (player *Player) GetName() string {
-// 	return player.name
-// }
+	if destination == 100 {
+		g.winner = g.players[g.currentTurn]
+	}
 
-// func (player *Player) getUniqueId() int {
-// 	mu.Lock()
-// 	defer mu.Unlock()
+	g.nextPlayer()
+	return true
+}
 
-// 	id := playerId
-// 	playerId++
-// 	return id
-// }
+func (g *Game) nextPlayer() {
+	g.currentTurn = (g.currentTurn + 1) % len(g.players)
+}
 
-// func SnakeLadderGame() {
-// 	fmt.Printf("Hello, world.\n")
+func (g *Game) GetPlayers() []*Player {
+	return g.players
+}
 
-// }
+func (g *Game) GetWinner() *Player {
+	return g.winner
+}
+
+func SnakesAndLadder() {
+
+	p1 := NewPlayer("Robert")
+	p2 := NewPlayer("Stannis")
+	p3 := NewPlayer("Renly")
+
+	snakes := []*Snake{
+		NewSnake(17, 7),
+		NewSnake(54, 34),
+		NewSnake(62, 19),
+		NewSnake(64, 60),
+		NewSnake(87, 36),
+		NewSnake(92, 73),
+		NewSnake(95, 75),
+		NewSnake(98, 79),
+	}
+
+	ladders := []*Ladder{
+		NewLadder(1, 38),
+		NewLadder(4, 14),
+		NewLadder(9, 31),
+		NewLadder(21, 42),
+		NewLadder(28, 84),
+		NewLadder(51, 67),
+		NewLadder(72, 91),
+		NewLadder(80, 99),
+	}
+
+	players := []*Player{p1, p2, p3}
+
+	g := NewGame(snakes, ladders, players)
+
+	for g.GetWinner() == nil {
+		diceVal := rand.Intn(6) + 1
+		g.Roll(p1, diceVal)
+		diceVal = rand.Intn(6) + 1
+		g.Roll(p2, diceVal)
+		diceVal = rand.Intn(6) + 1
+		g.Roll(p3, diceVal)
+	}
+
+	fmt.Printf("The winner is: %s\n", g.GetWinner().GetName())
+	fmt.Print("All Scores: ")
+	for _, player := range g.GetPlayers() {
+		fmt.Printf("%d ", player.GetCurrentPosition())
+	}
+	fmt.Println()
+}
