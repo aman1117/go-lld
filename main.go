@@ -6,8 +6,9 @@ import (
 
 func main() {
 
-	classes.MeetingScheduler()
-	classes.SnakesAndLadder()
-	classes.NotePad()
+	// classes.MeetingScheduler()
+	// classes.SnakesAndLadder()
+	// classes.NotePad()
+	classes.EmployeeManagement()
 
 }
