@@ -21,7 +21,7 @@ func NewEmployee(name string) *Employee {
 	employee := &Employee{
 		id:        getUniqueId(),
 		name:      name,
-		managerId: -1,
+		managerId: 0,
 	}
 	return employee
 }
