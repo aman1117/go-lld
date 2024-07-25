@@ -9,6 +9,7 @@ func main() {
 	// classes.MeetingScheduler()
 	// classes.SnakesAndLadder()
 	// classes.NotePad()
-	classes.EmployeeManagement()
+	// classes.EmployeeManagement()
+	classes.BookCatalogSystem()
 
 }
