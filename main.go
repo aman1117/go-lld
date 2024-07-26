@@ -10,6 +10,7 @@ func main() {
 	// classes.SnakesAndLadder()
 	// classes.NotePad()
 	// classes.EmployeeManagement()
-	classes.BookCatalogSystem()
+	// classes.BookCatalogSystem()
+	classes.SplitwiseExpense()
 
 }
