@@ -11,5 +11,6 @@ func main() {
 	// classes.BookCatalogSystem()
 	// classes.SplitwiseExpense()
 	classes.RideSystemClass()
+	classes.SalesManagement()
 
 }
